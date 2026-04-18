@@ -18,6 +18,9 @@ export class Users {
   @Column()
   phone: string;
 
+  @Column()
+  address: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
