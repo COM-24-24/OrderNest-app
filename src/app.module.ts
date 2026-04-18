@@ -1,12 +1,38 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { FooditemsModule } from './fooditems/fooditems.module';
+import { OrdersModule } from './orders/orders.module';
+import { PaymentsModule } from './payments/payments.module';
+import { Users } from './users/entities/user.entity';
+import { Fooditems } from './fooditems/entities/fooditem.entity';
+import { Order } from './orders/entities/order.entity';
+import { Payment } from './payments/entities/payment.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  imports: [UsersModule, FooditemsModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'oracle',
+        host: config.get('DB_HOST'),
+        port: parseInt(config.get('DB_PORT')),
+        username: config.get('DB_USERNAME'),
+        password: config.get('DB_PASSWORD'),
+        serviceName: config.get('DB_SERVICE_NAME'),
+        synchronize: config.get('DB_SYNCHRONIZE') === 'true',
+        entities: [Fooditems, Users, Order, Payment],
+        logging: true,
+      }),
+    }),
+    UsersModule,
+    FooditemsModule,
+    OrdersModule,
+    PaymentsModule,
+  ],
 })
+
 export class AppModule {}
