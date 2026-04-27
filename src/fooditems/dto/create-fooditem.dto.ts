@@ -1,4 +1,11 @@
-import { IsString, IsNumber, IsOptional, IsNotEmpty } from 'class-validator';
+import {
+    IsString,
+    IsNumber,
+    IsOptional,
+    IsNotEmpty,
+    IsEnum,
+} from 'class-validator';
+import { Status } from '../entities/fooditem.entity';
 
 export class CreateFooditemDto {
     @IsString()
@@ -6,7 +13,7 @@ export class CreateFooditemDto {
     name: string = '';
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional() // Matching the optional '?' type
     description?: string;
 
     @IsNumber()
@@ -14,6 +21,6 @@ export class CreateFooditemDto {
     price: number = 0;
 
     @IsOptional()
-    @IsString()
-    status: string = 'isAvailable';
+    @IsEnum(Status)
+    status?: Status = Status.isAvailable;
 }

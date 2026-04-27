@@ -2,9 +2,9 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { Order } from '../../orders/entities/order.entity';
 
 export enum PaymentMethod {
-  Airtel_money = 'Airtel_money',
-  TNM_mpamba = 'TNM_mpamba',
-  National_bank = 'National_bank',
+  Airtel_money = 1,
+  TNM_mpamba = 2,
+  National_bank = 3,
 }
 
 @Entity('payments')
@@ -16,6 +16,8 @@ export class Payment {
   @JoinColumn({ name: 'order_id' })
   order!: Order;
 
-  @Column({ type: 'enum', enum: PaymentMethod })
+  // Oracle does not support native ENUM types.
+  // We store the numeric value of the enum as a NUMBER in the database.
+  @Column({ type: 'number' }) // Removed 'enum: PaymentMethod'
   method!: PaymentMethod;
 }

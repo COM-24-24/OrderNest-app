@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { 
+    Entity,
+    PrimaryGeneratedColumn,
+    Column, 
+    CreateDateColumn, 
+    OneToMany 
+  } from 'typeorm';
 import { Order } from '../../orders/entities/order.entity';
 
 @Entity('users')
@@ -7,19 +13,19 @@ export class Users {
   id: number;
 
   @Column()
-  name: string;
+  name: string = '';
 
   @Column()
-  email: string;
+  email: string = '';
 
   @Column()
-  password: string;
+  password: string = '';
 
   @Column()
-  phone: string;
+  phone: string = '';
 
   @Column()
-  address: string;
+  address: string = '';
 
   @CreateDateColumn()
   createdAt: Date;

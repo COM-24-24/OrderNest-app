@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common'; 
-import { InjectRepository } from '@nestjs/typeorm'; 
-import { Repository } from 'typeorm'; 
-import { Fooditems } from './entities/fooditem.entity'; 
-import { CreateFooditemDto } from './dto/create-fooditem.dto'; 
-import { UpdateFooditemDto } from './dto/update-fooditem.dto'; 
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Fooditems } from './entities/fooditem.entity';
+import { CreateFooditemDto } from './dto/create-fooditem.dto';
+import { UpdateFooditemDto } from './dto/update-fooditem.dto';
 
 @Injectable()
 export class FooditemsService {
@@ -13,7 +13,8 @@ export class FooditemsService {
     ) {}
 
     async create(createFooditemDto: CreateFooditemDto): Promise<Fooditems> {
-    return await this.fooditemsRepository.save(createFooditemDto);
+    const fooditem = this.fooditemsRepository.create(createFooditemDto);
+    return await this.fooditemsRepository.save(fooditem);
     }
 
     async findAll(): Promise<Fooditems[]> {
@@ -28,8 +29,8 @@ export class FooditemsService {
 
     async update(id: number, updateFooditemDto: UpdateFooditemDto): Promise<Fooditems> { 
     await this.findOne(id);
-    await this.fooditemsRepository.update(id, updateFooditemDto); 
-    return await this.findOne(id); 
+    await this.fooditemsRepository.update(id, updateFooditemDto);
+    return await this.findOne(id);
     }
 
     async remove(id: number): Promise<{ message: string }> { 

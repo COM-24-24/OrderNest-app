@@ -1,16 +1,14 @@
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
-import { Order } from 'src/orders/entities/order.entity';
+import { IsNotEmpty, IsNumber, IsEnum } from 'class-validator';
+import { PaymentMethod } from '../entities/payment.entity'; // Import the enum
 
 export class CreatePaymentDto {
+    // id is usually handled by the database (Auto Increment)
     @IsNumber()
     @IsNotEmpty()
-    id: number = 0;
+    orderId!: number;
 
-    @IsNumber()
+    @IsNumber() // Changed from IsString
     @IsNotEmpty()
-    order!: Order;
-
-    @IsString()
-    @IsNotEmpty()
-    method!: string;
+    @IsEnum(PaymentMethod) // Add enum validation
+    method!: PaymentMethod; // Changed type to PaymentMethod enum
 }
