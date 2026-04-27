@@ -10,12 +10,12 @@ export enum PaymentMethod {
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: number = 0;
 
   @ManyToOne(() => Order, (order) => order.payments, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
-  order: Order;
+  order!: Order;
 
   @Column({ type: 'enum', enum: PaymentMethod })
-  method: PaymentMethod;
+  method!: PaymentMethod;
 }

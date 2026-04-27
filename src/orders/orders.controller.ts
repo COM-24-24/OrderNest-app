@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { Order } from './entities/order.entity';
 
@@ -14,5 +14,10 @@ export class OrdersController {
   @Get()
   findAll() {
     return this.ordersService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string): Promise<Order | null> {
+    return this.ordersService.findOne(+id);
   }
 }

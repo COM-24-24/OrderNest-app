@@ -17,6 +17,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
+        /* DB CONFIG SETTINGS
+           MAKE SURE ENV IS ACCURATE
+        */
         type: 'oracle',
         host: config.get('DB_HOST'),
         port: parseInt(config.get('DB_PORT')),
@@ -24,7 +27,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         password: config.get('DB_PASSWORD'),
         serviceName: config.get('DB_SERVICE_NAME'),
         synchronize: config.get('DB_SYNCHRONIZE') === 'true',
-        entities: [Fooditems, Users, Order, Payment],
+        entities: [Fooditems, Users, Order, Payment], // all entities available
         logging: true,
       }),
     }),

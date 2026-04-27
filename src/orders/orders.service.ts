@@ -17,4 +17,8 @@ export class OrdersService {
   findAll() {
     return this.ordersRepository.find({ relations: ['user', 'payments'] });
   }
+
+  findOne(id: number) {
+    return this.ordersRepository.findOne({ where: {id}, relations: ['user', 'payments'] });
+  } 
 }

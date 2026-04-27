@@ -3,17 +3,17 @@ import { IsString, IsNumber, IsOptional, IsNotEmpty } from 'class-validator';
 export class CreateFooditemDto {
     @IsString()
     @IsNotEmpty()
-    name: string;
+    name: string = '';
 
     @IsString()
     @IsNotEmpty()
-    description: string;
+    description?: string;
 
     @IsNumber()
     @IsNotEmpty()
-    price: number;
+    price: number = 0;
 
     @IsOptional()
     @IsString()
-    status: string;
+    status: string = 'isAvailable';
 }

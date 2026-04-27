@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { Payment } from './entities/payment.entity';
 
@@ -14,5 +14,10 @@ export class PaymentsController {
   @Get()
   findAll() {
     return this.paymentsService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string): Promise<Payment | null> {
+    return this.paymentsService.findOne(+id);
   }
 }

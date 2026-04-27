@@ -8,24 +8,24 @@ enum Status {
 @Entity('fooditems')
 export class Fooditems {
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column()
-    name: string;
+    name!: string;
 
     @Column()
-    description: string;
+    description!: string;
 
     @Column('decimal', { precision: 10, scale: 2 })
-    price: number;
+    price!: number;
 
     @Column({
         type: 'enum',
         enum: Status,
         default: Status.isAvailable
     })
-    status: Status;
+    status: Status = Status.isAvailable;
 
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt: Date = new Date();
 }
