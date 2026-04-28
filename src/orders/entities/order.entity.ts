@@ -28,11 +28,11 @@ export class Order {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Users, (user) => user.orders, { nullable: false })
+  @ManyToOne(() => Users, (user) => user.orders, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: Users;
 
-  @ManyToOne(() => Fooditems, (fooditem) => fooditem.orders, {nullable: false})
+  @ManyToOne(() => Fooditems, (fooditem) => fooditem.orders, {nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'fooditem_id' }) // Ensure this matches your DB casing
   fooditem!: Fooditems;
 
