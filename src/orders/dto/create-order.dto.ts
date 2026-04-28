@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty} from 'class-validator';
+import { IsNumber, IsNotEmpty, IsOptional} from 'class-validator';
 import { OrderSize, DeliveryTime } from '../entities/order.entity';
 
 export class CreateOrderDto {
@@ -10,4 +10,10 @@ export class CreateOrderDto {
 
     @IsNotEmpty()
     deliveryAddress!: string;
+
+    @IsNotEmpty()
+    fooditemId!: number;
+
+    @IsOptional()
+    deliveryTime!: DeliveryTime;
 }

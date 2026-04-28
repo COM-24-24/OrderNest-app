@@ -15,6 +15,7 @@ export enum OrderSize {
   Small = 'small',
   Medium = 'medium',
   Large = 'large',
+  // Order size is a number in the database, but we use an enum in TypeScript for better readability.
 }
 
 export enum DeliveryTime {
@@ -28,11 +29,11 @@ export class Order {
   id!: number;
 
   @ManyToOne(() => Users, (user) => user.orders, { nullable: false })
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'name' })
+  @JoinColumn({ name: 'user_id' })
   user!: Users;
 
-  @ManyToOne(() => Fooditems, (fooditem) => fooditem.orders, {nullable: false}) })
-  @JoinColumn({ name: 'fooditem_name', referencedColumnName: 'name' }) // Ensure this matches your DB casing
+  @ManyToOne(() => Fooditems, (fooditem) => fooditem.orders, {nullable: false})
+  @JoinColumn({ name: 'fooditem_id' }) // Ensure this matches your DB casing
   fooditem!: Fooditems;
 
   @Column({
@@ -57,5 +58,5 @@ export class Order {
   deliveryTime: DeliveryTime = DeliveryTime.Lunch;
 
   @OneToMany(() => Payment, (payment) => payment.order, { cascade: true })
-  payments: Payment[];
+  payments!: Payment[];
 }
