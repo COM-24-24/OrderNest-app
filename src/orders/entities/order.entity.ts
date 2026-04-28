@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { Payment } from '../../payments/entities/payment.entity';
+import { Fooditems } from 'src/fooditems/entities/fooditem.entity';
 
 export enum OrderSize {
   Small = 'small',
@@ -24,11 +25,15 @@ export enum DeliveryTime {
 @Entity('orders')
 export class Order {
   @PrimaryGeneratedColumn()
-  id: number = 0;
+  id!: number;
 
   @ManyToOne(() => Users, (user) => user.orders, { nullable: false })
-  @JoinColumn({ name: 'user_id' })
-  user: Users;
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'name' })
+  user!: Users;
+
+  @ManyToOne(() => Fooditems, (fooditem) => fooditem.orders, {nullable: false}) })
+  @JoinColumn({ name: 'fooditem_name', referencedColumnName: 'name' }) // Ensure this matches your DB casing
+  fooditem!: Fooditems;
 
   @Column({
     type: 'varchar',
@@ -37,11 +42,11 @@ export class Order {
   })
   amount: OrderSize = OrderSize.Small;
 
-  @Column({ name: 'delivery_address' })
-  deliveryAddress: string = '';
+  @Column({ name: 'delivery_address', default: 'Campus' })
+  deliveryAddress: string = 'Campus';
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date = new Date();
+  createdAt!: Date;
 
   @Column({
     name: 'delivery_time',

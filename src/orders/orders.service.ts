@@ -11,7 +11,8 @@ export class OrdersService {
   ) {}
 
   create(order: Order) {
-    return this.ordersRepository.save(order);
+    const newOrder = this.ordersRepository.create(order);
+    return this.ordersRepository.save(newOrder);
   }
 
   findAll() {

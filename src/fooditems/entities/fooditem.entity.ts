@@ -1,8 +1,10 @@
+import { Order } from 'src/orders/entities/order.entity';
 import { 
     Entity,
      PrimaryGeneratedColumn,
      Column,
-     CreateDateColumn
+     CreateDateColumn,
+     OneToMany
      } from 'typeorm';
 
 export enum Status {
@@ -15,7 +17,7 @@ export class Fooditems {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({ unique: true })
     name!: string;
 
     @Column()
@@ -32,6 +34,9 @@ export class Fooditems {
         length: 50 // Choose an appropriate length for your enum values (e.g., 'notAvailable' is 12 chars)
     })
     status: Status = Status.isAvailable;
+
+    @OneToMany(() => Order, (order) => order.fooditem)
+    orders!:Order[];
 
     @CreateDateColumn()
     createdAt: Date = new Date();

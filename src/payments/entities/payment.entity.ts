@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  JoinColumn 
+} from 'typeorm';
 import { Order } from '../../orders/entities/order.entity';
 
 export enum PaymentMethod {
@@ -10,7 +16,7 @@ export enum PaymentMethod {
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn()
-  id: number = 0;
+  id!: number;
 
   @ManyToOne(() => Order, (order) => order.payments, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
