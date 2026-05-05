@@ -9,6 +9,7 @@ import { Order } from './orders/entities/order.entity';
 import { Payment } from './payments/entities/payment.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     FooditemsModule,
     OrdersModule,
     PaymentsModule,
+    AuthModule,
   ],
 })
 

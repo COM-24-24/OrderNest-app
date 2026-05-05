@@ -1,8 +1,19 @@
-import { Controller, Patch, Get, Delete, Post, Body, Param } from '@nestjs/common';
+import { 
+    Controller,
+    Patch,
+    Get,
+    Delete,
+    Post,
+    Body,
+    Param,
+    Request
+ } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto'; 
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
-
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+import { UseGuards } from '@nestjs/common';
+import { SigninDto } from 'src/auth/dto/signin.dto';
 @Controller('users')
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
@@ -22,6 +33,11 @@ export class UsersController {
     return this.usersService.findOne(+id);
     }
 
+    @Get('email/:email')
+    findByEmail(@Param('email') email: string) {
+    return this.usersService.findByEmail(email);
+    }
+
     @Patch(':id')
     update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
@@ -31,4 +47,12 @@ export class UsersController {
     remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
     }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  getAllUsers(@Request() req) {
+    // req.user contains { userId, email } from JWT payload
+    console.log('Accessed by user:', req.user);
+    return { message: 'Protected route accessed' };
+  }
 }
