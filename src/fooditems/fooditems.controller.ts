@@ -2,12 +2,15 @@ import { Controller, Get, Post, Body, Patch, Delete, Param } from '@nestjs/commo
 import { CreateFooditemDto } from './dto/create-fooditem.dto'; 
 import { UpdateFooditemDto } from './dto/update-fooditem.dto'; 
 import { FooditemsService } from './fooditems.service';
+import { Roles } from 'src/auth/User Roles/roles.decorator';
+import { Role } from 'src/auth/User Roles/roles.enum';
 
 @Controller('fooditems')
 export class FooditemsController {
     constructor(private readonly fooditemsService: FooditemsService) {}
 
     @Post()
+    @Roles(Role.Admin)
     create(@Body() createFooditemDto: CreateFooditemDto) {
         return this.fooditemsService.create(createFooditemDto);
     }
@@ -23,11 +26,13 @@ export class FooditemsController {
     }
 
     @Patch(':id')
+    @Roles(Role.Admin)
     update(@Param('id') id: string, @Body() updateFooditemDto: UpdateFooditemDto) {
         return this.fooditemsService.update(+id, updateFooditemDto);
     }
 
     @Delete(':id')
+    @Roles(Role.Admin)
     remove(@Param('id') id: string) {
         return this.fooditemsService.remove(+id);
     }

@@ -6,6 +6,7 @@ import {
   JoinColumn 
 } from 'typeorm';
 import { Order } from '../../orders/entities/order.entity';
+import { Users } from 'src/users/entities/user.entity';
 
 export enum PaymentMethod {
   Airtel_money = 1,
@@ -18,12 +19,18 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => Order, (order) => order.payments, { nullable: false, onDelete: 'CASCADE' })
+  @Column({name: 'user_id', nullable: true })
+  userId!: number | null;
+
+  @ManyToOne(() => Users, { nullable: true, onDelete: 'CASCADE', eager: false })
+  @JoinColumn({ name: 'user_id' })
+  user!: Users | null;
+
+  @ManyToOne(() => Order, (order) => order.payments, { nullable: false, onDelete: 'CASCADE', eager: false })
   @JoinColumn({ name: 'order_id' })
   order!: Order;
 
-  // Oracle does not support native ENUM types.
   // We store the numeric value of the enum as a NUMBER in the database.
-  @Column({ type: 'number' }) // Removed 'enum: PaymentMethod'
+  @Column({ type: 'number' })
   method!: PaymentMethod;
 }

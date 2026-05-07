@@ -2,7 +2,9 @@ import { IsNumber, IsEnum } from 'class-validator';
 import { PaymentMethod } from '../entities/payment.entity'; // Import the enum
 
 export class CreatePaymentDto {
-    // id is usually handled by the database (Auto Increment)
+   @IsNumber()
+    userId!: number;
+    
     @IsNumber()
     orderId!: number;
  // Changed from IsString

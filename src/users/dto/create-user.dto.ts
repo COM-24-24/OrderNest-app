@@ -20,5 +20,9 @@ export class CreateUserDto {
     @IsOptional()
     @IsString()
     address!: string;
+
+    @IsNotEmpty()
+    @IsString()
+    role!: string; // Role is required when creating a user
     
 }

@@ -6,6 +6,7 @@ import {
     OneToMany 
   } from 'typeorm';
 import { Order } from '../../orders/entities/order.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
 
 @Entity('users')
 export class Users {
@@ -26,6 +27,12 @@ export class Users {
 
   @Column()
   address: string = '';
+
+  @Column()
+  role: string = 'customer'; // Default role is 'customer'
+
+  @OneToMany(() => Payment, (payment) => payment.user)
+  payments!: Payment[];
 
   @CreateDateColumn()
   createdAt: Date;

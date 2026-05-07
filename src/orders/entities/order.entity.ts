@@ -57,6 +57,13 @@ export class Order {
   })
   deliveryTime: DeliveryTime = DeliveryTime.Lunch;
 
+  @ManyToOne(() => Users, { nullable: true }) // Optional relationship to an agent
+  @JoinColumn({ name: 'agentId' })
+  agent?: Users;
+
+  @Column({ name: 'agentId', nullable: true })
+  agentId?: number;
+
   @OneToMany(() => Payment, (payment) => payment.order, { cascade: true })
   payments!: Payment[];
 }

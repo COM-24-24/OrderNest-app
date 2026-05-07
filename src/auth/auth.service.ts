@@ -4,6 +4,7 @@ import { UsersService } from 'src/users/users.service';
 import { UsersModule } from 'src/users/users.module';
 import { Users } from 'src/users/entities/user.entity';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { Role } from './User Roles/roles.enum';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -22,9 +23,9 @@ export class AuthService {
     return await bcrypt.compare(password, hash);
   }
 
-  async signup(createUserDto: CreateUserDto): Promise<{ 
-    user: Users; 
-    access_token: string 
+  async signup(createUserDto: CreateUserDto): Promise<{
+    user: Users;
+    access_token: string
   }> {
     // Check if email already exists
     const existingUser = await this.usersService.findByEmail(createUserDto.email);
@@ -40,7 +41,7 @@ export class AuthService {
     });
 
      const access_token = this.jwtService.sign(
-      { sub: user.id, email: user.email },
+      { sub: user.id, email: user.email, roles: user.role },
       { expiresIn: '24h' },
     );
 
@@ -62,7 +63,7 @@ export class AuthService {
     }
 
     const access_token = this.jwtService.sign(
-      { sub: user.id, email: user.email },
+      { sub: user.id, email: user.email, roles: user.role },
       { expiresIn: '24h' },
     );
 

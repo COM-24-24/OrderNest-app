@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { Order } from 'src/orders/entities/order.entity';
-
+import { UpdatePaymentDto } from './dto/update-payment.dto';
 @Injectable()
 export class PaymentsService {
   constructor(
@@ -25,8 +25,17 @@ export class PaymentsService {
     const payment = this.paymentsRepository.create({
       method: CreatePaymentDto.method,
       order,
+      userId: CreatePaymentDto.userId,
     });
     return this.paymentsRepository.save(payment);
+  }
+
+  async update(id: number, updatePaymentDto: UpdatePaymentDto): Promise<Payment> {
+    const payment = await this.paymentsRepository.findOne({ where: { id } });
+    if (!payment) {
+      throw new Error('Payment not found');
+    }
+    return this.paymentsRepository.save({ ...payment, ...updatePaymentDto });
   }
 
   async findAll() {

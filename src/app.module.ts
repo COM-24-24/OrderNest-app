@@ -27,7 +27,7 @@ import { AuthModule } from './auth/auth.module';
         username: config.get('DB_USERNAME'),
         password: config.get('DB_PASSWORD'),
         serviceName: config.get('DB_SERVICE_NAME'),
-        synchronize: config.get('DB_SYNCHRONIZE') === 'true',
+        synchronize: config.get('DB_SYNCHRONIZE') === false ? false : true, // Default to true if not set
         entities: [Fooditems, Users, Order, Payment], // all entities available
         logging: true,
       }),
@@ -39,5 +39,4 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
 })
-
 export class AppModule {}
