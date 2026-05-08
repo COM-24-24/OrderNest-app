@@ -1,0 +1,949 @@
+////// install packages ,, run
+npm install swagger-ui-express swagger-jsdoc
+
+////// install typescript types
+npm install -D @types/swagger-ui-express
+
+/////    app.ts file with
+import express from "express";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
+
+const app = express();
+
+app.use(express.json());
+
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "My Existing API",
+      version: "1.0.0",
+      description: "API documentation"
+    }
+  },
+  apis: ["./src/routes/*.ts"]
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.listen(3000, () => {
+  console.log("Server running");
+});
+
+
+////// modify the main.ts file as
+
+import { NestFactory, Reflector } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+
+import { JwtAuthGuard } from './auth/guards/jwt.guard';
+import { RolesGuard } from './auth/User Roles/roles.guard';
+
+import * as dotenv from 'dotenv';
+
+// Swagger imports
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
+dotenv.config();
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // Validation pipe
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+    }),
+  );
+
+  const reflector = app.get(Reflector);
+
+  // Swagger configuration
+  const config = new DocumentBuilder()
+    .setTitle('Food Ordering API')
+    .setDescription('API documentation for the Food Ordering System')
+    .setVersion('1.0')
+    .addBearerAuth() // JWT authentication support
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('api-docs', app, document);
+
+  await app.listen(process.env.PORT ?? 3000);
+
+  console.log(
+    `Swagger running at: http://localhost:${process.env.PORT ?? 3000}/api-docs`,
+  );
+}
+
+bootstrap();
+
+////// modify the users.controller.ts file as
+
+import {
+  Controller,
+  Patch,
+  Get,
+  Delete,
+  Post,
+  Body,
+  Param,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
+
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+
+import { UsersService } from './users.service';
+
+import { JwtAuthGuard } from '../auth/guards/jwt.guard';
+
+import { Role } from 'src/auth/User Roles/roles.enum';
+import { Roles } from 'src/auth/User Roles/roles.decorator';
+import { RolesGuard } from 'src/auth/User Roles/roles.guard';
+
+@ApiTags('users')
+@ApiBearerAuth()
+@Controller('users')
+export class UsersController {
+
+  constructor(private readonly usersService: UsersService) {}
+
+  // CREATE USER
+  @Post()
+  @ApiOperation({
+    summary: 'Create a new user',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully',
+  })
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+
+  // GET ALL USERS
+  @Get()
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Get all users',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Users retrieved successfully',
+  })
+  findAll(@Request() req) {
+    console.log('Accessed by user:', req.user);
+
+    return this.usersService.findAll();
+  }
+
+  // GET USER BY ID
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get user by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+    description: 'User ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User retrieved successfully',
+  })
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(+id);
+  }
+
+  // GET USER BY EMAIL
+  @Get('email/:email')
+  @ApiOperation({
+    summary: 'Get user by email',
+  })
+  @ApiParam({
+    name: 'email',
+    example: 'john@gmail.com',
+    description: 'User email address',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User found successfully',
+  })
+  findByEmail(@Param('email') email: string) {
+    return this.usersService.findByEmail(email);
+  }
+
+  // UPDATE USER
+  @Patch(':id')
+  @ApiOperation({
+    summary: 'Update user',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated successfully',
+  })
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.update(+id, updateUserDto);
+  }
+
+  // DELETE USER
+  @Delete(':id')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Delete user',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User deleted successfully',
+  })
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(+id);
+  }
+}
+
+//////  modify the payment.controller.ts as
+
+
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
+
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
+
+import { PaymentsService } from './payments.service';
+import { Payment } from './entities/payment.entity';
+
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
+
+import { Roles } from 'src/auth/User Roles/roles.decorator';
+import { Role } from 'src/auth/User Roles/roles.enum';
+
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/User Roles/roles.guard';
+
+@ApiTags('payments')
+@ApiBearerAuth()
+@Controller('payments')
+export class PaymentsController {
+
+  constructor(
+    private readonly paymentsService: PaymentsService,
+  ) {}
+
+  // CREATE PAYMENT
+  @Post()
+  @Roles(Role.Customer)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Create a payment',
+    description: 'Allows customers to create payments',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Payment created successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+  })
+  create(
+    @Body() createPaymentDto: CreatePaymentDto,
+  ) {
+    return this.paymentsService.create(createPaymentDto);
+  }
+
+  // UPDATE PAYMENT
+  @Patch(':id')
+  @Roles(Role.Customer, Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Update payment',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+    description: 'Payment ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Payment not found',
+  })
+  async updatePayment(
+    @Param('id', ParseIntPipe) id: number,
+
+    @Body() dto: UpdatePaymentDto,
+  ) {
+    return this.paymentsService.update(id, dto);
+  }
+
+  // GET ALL PAYMENTS
+  @Get()
+  @Roles(Role.Admin, Role.Customer, Role.Agent)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Get all payments',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Payments retrieved successfully',
+  })
+  findAll() {
+    return this.paymentsService.findAll();
+  }
+
+  // GET PAYMENT BY ID
+  @Get(':id')
+  @Roles(Role.Admin, Role.Customer, Role.Agent)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Get payment by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+    description: 'Payment ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Payment not found',
+  })
+  findOne(
+    @Param('id') id: string,
+  ): Promise<Payment | null> {
+
+    return this.paymentsService.findOne(+id);
+  }
+}
+
+
+/////// modify the orders.controller.ts
+
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
+
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
+
+import { OrdersService } from './orders.service';
+import { Order } from './entities/order.entity';
+
+import { CreateOrderDto } from './dto/create-order.dto';
+
+import { Role } from 'src/auth/User Roles/roles.enum';
+import { Roles } from 'src/auth/User Roles/roles.decorator';
+
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/User Roles/roles.guard';
+
+@ApiTags('orders')
+@ApiBearerAuth()
+@Controller('orders')
+export class OrdersController {
+
+  constructor(
+    private readonly ordersService: OrdersService,
+  ) {}
+
+  // CREATE ORDER
+  @Post()
+  @Roles(Role.Customer, Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Create a new order',
+    description: 'Allows customers and admins to create orders',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Order created successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+  })
+  create(
+    @Body() createOrderDto: CreateOrderDto,
+  ) {
+    return this.ordersService.create(createOrderDto);
+  }
+
+  // GET ALL ORDERS
+  @Get()
+  @Roles(Role.Customer, Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Get all orders',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Orders retrieved successfully',
+  })
+  findAll() {
+    return this.ordersService.findAll();
+  }
+
+  // GET ORDER BY ID
+  @Get(':id')
+  @Roles(Role.Customer, Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Get order by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+    description: 'Order ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Order retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Order not found',
+  })
+  findOne(
+    @Param('id') id: string,
+  ): Promise<Order | null> {
+
+    return this.ordersService.findOne(+id);
+  }
+
+  // ASSIGN AGENT TO ORDER
+  @Patch(':id/assign-agent')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Assign delivery agent to order',
+    description: 'Only admins can assign agents to orders',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+    description: 'Order ID',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        agentId: {
+          type: 'number',
+          example: 5,
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Agent assigned successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Order or agent not found',
+  })
+  async assignAgent(
+
+    @Param('id', ParseIntPipe)
+    orderId: number,
+
+    @Body('agentId', ParseIntPipe)
+    { agentId }: { agentId: number },
+
+  ) {
+    return this.ordersService.assignAgent(
+      orderId,
+      agentId,
+    );
+  }
+}
+
+/////// modify the food item controller.ts
+
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Delete,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
+
+import { CreateFooditemDto } from './dto/create-fooditem.dto';
+import { UpdateFooditemDto } from './dto/update-fooditem.dto';
+
+import { FooditemsService } from './fooditems.service';
+
+import { Roles } from 'src/auth/User Roles/roles.decorator';
+import { Role } from 'src/auth/User Roles/roles.enum';
+
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/auth/User Roles/roles.guard';
+
+@ApiTags('fooditems')
+@ApiBearerAuth()
+@Controller('fooditems')
+export class FooditemsController {
+
+  constructor(
+    private readonly fooditemsService: FooditemsService,
+  ) {}
+
+  // CREATE FOOD ITEM
+  @Post()
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Create a food item',
+    description: 'Only admins can create food items',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Food item created successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden',
+  })
+  create(
+    @Body() createFooditemDto: CreateFooditemDto,
+  ) {
+    return this.fooditemsService.create(createFooditemDto);
+  }
+
+  // GET ALL FOOD ITEMS
+  @Get()
+  @ApiOperation({
+    summary: 'Get all food items',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Food items retrieved successfully',
+  })
+  findAll() {
+    return this.fooditemsService.findAll();
+  }
+
+  // GET FOOD ITEM BY ID
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get food item by ID',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+    description: 'Food item ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Food item retrieved successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Food item not found',
+  })
+  findOne(
+    @Param('id') id: string,
+  ) {
+    return this.fooditemsService.findOne(+id);
+  }
+
+  // UPDATE FOOD ITEM
+  @Patch(':id')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Update food item',
+    description: 'Only admins can update food items',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+    description: 'Food item ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Food item updated successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Food item not found',
+  })
+  update(
+    @Param('id') id: string,
+
+    @Body()
+    updateFooditemDto: UpdateFooditemDto,
+  ) {
+    return this.fooditemsService.update(
+      +id,
+      updateFooditemDto,
+    );
+  }
+
+  // DELETE FOOD ITEM
+  @Delete(':id')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({
+    summary: 'Delete food item',
+    description: 'Only admins can delete food items',
+  })
+  @ApiParam({
+    name: 'id',
+    example: 1,
+    description: 'Food item ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Food item deleted successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Food item not found',
+  })
+  remove(
+    @Param('id') id: string,
+  ) {
+    return this.fooditemsService.remove(+id);
+  }
+}
+
+/////// modify the auth.controller.ts
+
+import { Controller, Post, Body } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { SigninDto } from 'src/auth/dto/signin.dto';
+import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
+
+@ApiTags('Auth')
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('signup')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({ status: 201, description: 'User successfully created' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  async signup(@Body() createUserDto: CreateUserDto) {
+    return await this.authService.signup(createUserDto);
+  }
+
+  @Post('signin')
+  @ApiOperation({ summary: 'User login' })
+  @ApiBody({ type: SigninDto })
+  @ApiResponse({ status: 200, description: 'User successfully logged in' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  async signin(@Body() signinDto: SigninDto) {
+    return await this.authService.signin(signinDto.email, signinDto.password);
+  }
+}
+
+
+///// modify the fooditem dto with swagger as
+
+import {
+    IsString,
+    IsNumber,
+    IsOptional,
+    IsNotEmpty,
+    IsEnum,
+} from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Status } from '../entities/fooditem.entity';
+
+export class CreateFooditemDto {
+
+    @ApiProperty({
+        example: 'Burger',
+        description: 'Name of the food item',
+    })
+    @IsString()
+    @IsNotEmpty()
+    name: string = '';
+
+    @ApiPropertyOptional({
+        example: 'A delicious beef burger with cheese',
+        description: 'Optional description of the food item',
+    })
+    @IsString()
+    @IsOptional()
+    description?: string;
+
+    @ApiProperty({
+        example: 5.99,
+        description: 'Price of the food item',
+    })
+    @IsNumber()
+    @IsNotEmpty()
+    price: number = 0;
+
+    @ApiPropertyOptional({
+        enum: Status,
+        example: Status.isAvailable,
+        description: 'Availability status of the food item',
+    })
+    @IsOptional()
+    @IsEnum(Status)
+    status?: Status = Status.isAvailable;
+}
+
+//// modify fooditem(update.dto.ts file)
+
+import { PartialType } from '@nestjs/mapped-types';
+import { ApiExtraModels } from '@nestjs/swagger';
+import { CreateFooditemDto } from './create-fooditem.dto';
+
+@ApiExtraModels(CreateFooditemDto)
+export class UpdateFooditemDto extends PartialType(CreateFooditemDto) {}
+
+///// auth signing dto modify
+
+import { IsEmail, IsString, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class SigninDto {
+
+  @ApiProperty({
+    example: 'john@example.com',
+    description: 'User email address',
+  })
+  @IsEmail()
+  email!: string;
+
+  @ApiProperty({
+    example: 'password123',
+    description: 'User password',
+  })
+  @IsString()
+  @IsNotEmpty()
+  password!: string;
+}
+
+//// modify the create order dto as
+
+import { IsNumber, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { OrderSize, DeliveryTime } from '../entities/order.entity';
+
+export class CreateOrderDto {
+
+    @ApiProperty({
+        example: 1,
+        description: 'ID of the user placing the order',
+    })
+    @IsNumber()
+    userId!: number;
+
+    @ApiProperty({
+        enum: OrderSize,
+        example: OrderSize.MEDIUM,
+        description: 'Size or amount of the order',
+    })
+    @IsNumber()
+    amount!: OrderSize;
+
+    @ApiProperty({
+        example: 'Area 49, Lilongwe',
+        description: 'Delivery address for the order',
+    })
+    @IsNotEmpty()
+    deliveryAddress!: string;
+
+    @ApiProperty({
+        example: 5,
+        description: 'ID of the food item being ordered',
+    })
+    @IsNotEmpty()
+    fooditemId!: number;
+
+    @ApiPropertyOptional({
+        enum: DeliveryTime,
+        example: DeliveryTime.MORNING,
+        description: 'Preferred delivery time',
+    })
+    @IsOptional()
+    deliveryTime!: DeliveryTime;
+}
+
+///// modify the create users dto as
+
+
+import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class CreateUserDto {
+
+    @ApiProperty({
+        example: 'John Doe',
+        description: 'Full name of the user',
+    })
+    @IsString()
+    @IsNotEmpty()
+    name!: string;
+
+    @ApiProperty({
+        example: 'john@example.com',
+        description: 'Email address of the user',
+    })
+    @IsString()
+    @IsNotEmpty()
+    email!: string;
+
+    @ApiProperty({
+        example: 'password123',
+        description: 'User password',
+    })
+    @IsString()
+    @IsNotEmpty()
+    password!: string;
+
+    @ApiProperty({
+        example: '+265991234567',
+        description: 'Phone number of the user',
+    })
+    @IsString()
+    @IsNotEmpty()
+    phone!: string;
+
+    @ApiPropertyOptional({
+        example: 'Area 49, Lilongwe',
+        description: 'Residential address of the user',
+    })
+    @IsOptional()
+    @IsString()
+    address!: string;
+
+    @ApiProperty({
+        example: 'customer',
+        description: 'Role assigned to the user',
+    })
+    @IsNotEmpty()
+    @IsString()
+    role!: string;
+}
+
+//// modify the update user dto as:
+
+
+import { PartialType } from '@nestjs/mapped-types';
+import { ApiExtraModels } from '@nestjs/swagger';
+import { CreateUserDto } from './create-user.dto';
+
+@ApiExtraModels(CreateUserDto)
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
+
+
+////// modify the create payment dto
+
+import { IsNumber, IsEnum } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { PaymentMethod } from '../entities/payment.entity';
+
+export class CreatePaymentDto {
+
+    @ApiProperty({
+        example: 1,
+        description: 'ID of the user making the payment',
+    })
+    @IsNumber()
+    userId!: number;
+
+    @ApiProperty({
+        example: 10,
+        description: 'ID of the order being paid for',
+    })
+    @IsNumber()
+    orderId!: number;
+
+    @ApiProperty({
+        enum: PaymentMethod,
+        example: PaymentMethod.CASH,
+        description: 'Payment method used for the transaction',
+    })
+    @IsEnum(PaymentMethod)
+    method!: PaymentMethod;
+}
+
+/////// update payment dto
+
+import { PartialType } from '@nestjs/mapped-types';
+import { ApiExtraModels } from '@nestjs/swagger';
+import { CreatePaymentDto } from './create-payment.dto';
+
+@ApiExtraModels(CreatePaymentDto)
+export class UpdatePaymentDto extends PartialType(CreatePaymentDto) {}
