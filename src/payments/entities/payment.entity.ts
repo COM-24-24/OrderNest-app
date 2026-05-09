@@ -12,6 +12,7 @@ export enum PaymentMethod {
   Airtel_money = 1,
   TNM_mpamba = 2,
   National_bank = 3,
+  // enum defines the method customer chooses to pay for fooditem
 }
 
 @Entity('payments')
@@ -19,7 +20,7 @@ export class Payment {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({name: 'user_id', nullable: true })
+  @Column({name: 'user_id', nullable: true }) //this user_id references customer paying for order
   userId!: number | null;
 
   @ManyToOne(() => Users, { nullable: true, onDelete: 'CASCADE', eager: false })
