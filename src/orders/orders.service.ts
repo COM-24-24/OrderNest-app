@@ -48,7 +48,12 @@ export class OrdersService {
       throw new Error('Order not found');
     }
 
-    const agent = await this.usersRepository.findOneBy({ id: agentId, role: Role.Agent });
+    const agent = await this.usersRepository.findOne({ 
+      where: { 
+        id: agentId, 
+        role: Role.Agent 
+      } 
+    });
     if (!agent) {
       throw new Error('Agent not found');
     }

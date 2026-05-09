@@ -27,6 +27,9 @@ export class Users {
   @Column()
   address: string = '';
 
+  @Column()
+  role: string = 'customer';
+
   @CreateDateColumn()
   createdAt: Date;
 

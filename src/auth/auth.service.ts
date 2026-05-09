@@ -40,13 +40,13 @@ export class AuthService {
       password: hashedPassword,
     });
 
-     const access_token = this.jwtService.sign(
-      { sub: user.id, email: user.email, roles: user.role },
+    const access_token = this.jwtService.sign(
+      { sub: user.id, email: user.email, role: user.role },
       { expiresIn: '24h' },
     );
 
     return { user, access_token };
-    }
+  }
 
     async signin(email: string, password: string): Promise<{
     user: Users;
@@ -63,7 +63,7 @@ export class AuthService {
     }
 
     const access_token = this.jwtService.sign(
-      { sub: user.id, email: user.email, roles: user.role },
+      { sub: user.id, email: user.email, role: user.role },
       { expiresIn: '24h' },
     );
 

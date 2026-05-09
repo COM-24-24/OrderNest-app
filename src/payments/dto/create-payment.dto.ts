@@ -1,13 +1,26 @@
 import { IsNumber, IsEnum } from 'class-validator';
-import { PaymentMethod } from '../entities/payment.entity'; // Import the enum
+import { PaymentMethod } from '../entities/payment.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePaymentDto {
-   @IsNumber()
+   @ApiProperty({
+        example: 1,
+        description: 'The ID of the user making the payment',
+    })
+    @IsNumber()
     userId!: number;
     
+    @ApiProperty({
+        example: 1,
+        description: 'The ID of the order for which payment is being made',
+    })
     @IsNumber()
     orderId!: number;
- // Changed from IsString
-    @IsEnum(PaymentMethod) // Add enum validation
-    method!: PaymentMethod; // Changed type to PaymentMethod enum
+    @ApiProperty({
+        example: PaymentMethod.Airtel_money,
+        description: 'The method of payment',
+        enum: PaymentMethod,
+    })
+    @IsEnum(PaymentMethod)
+    method!: PaymentMethod;
 }
