@@ -52,7 +52,7 @@ export class OrdersController {
   @Roles(Role.Admin)
   async assignAgent(
     @Param('id', ParseIntPipe) orderId: number,
-    @Body('agentId', ParseIntPipe) { agentId }: { agentId: number },
+    @Body() { agentId }: { agentId: number },
   ) {
     return this.ordersService.assignAgent(orderId, agentId);
   }

@@ -41,7 +41,7 @@ export class AuthService {
     });
 
     const access_token = this.jwtService.sign(
-      { sub: user.id, email: user.email, role: user.role },
+      { sub: user.id, email: user.email, roles: [user.role] },
       { expiresIn: '24h' },
     );
 
@@ -63,7 +63,7 @@ export class AuthService {
     }
 
     const access_token = this.jwtService.sign(
-      { sub: user.id, email: user.email, role: user.role },
+      { sub: user.id, email: user.email, roles: [user.role] },
       { expiresIn: '24h' },
     );
 
