@@ -11,6 +11,8 @@ import {
     ApiBearerAuth,
     ApiParam,
  } from '@nestjs/swagger';
+import { Role } from 'src/auth/User Roles/roles.enum';
+import { Roles } from 'src/auth/User Roles/roles.decorator';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -33,7 +35,7 @@ export class UsersController {
     return this.usersService.findAll();
     }
 
-    @Public()
+    @Roles(Role.Admin, Role.Agent, Role.Customer)
     @Get(':id')
     @ApiOperation({ summary: 'Retrieve a user by ID' })
     @ApiResponse({ status: 200, description: 'User retrieved successfully' })
@@ -43,6 +45,7 @@ export class UsersController {
     return this.usersService.findOne(+id);
     }
 
+    @Roles(Role.Admin, Role.Customer)
     @Patch(':id')
     @ApiOperation({ summary: 'Update a user' })
     @ApiResponse({ status: 200, description: 'User updated successfully' })
@@ -51,6 +54,7 @@ export class UsersController {
     return this.usersService.update(+id, updateUserDto);
     }
 
+    @Roles(Role.Admin)
     @Delete(':id')
     @ApiOperation({ summary: 'Delete a user' })
     @ApiResponse({ status: 200, description: 'User deleted successfully' })

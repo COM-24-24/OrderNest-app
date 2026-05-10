@@ -20,7 +20,7 @@ import {
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @Public()
+  @Roles(Role.Customer, Role.Agent, Role.Admin)
   @Post()
   @ApiOperation({ summary: 'Create a new order' })
   @ApiResponse({ status: 201, description: 'Order created successfully' })
@@ -28,7 +28,7 @@ export class OrdersController {
     return this.ordersService.create(CreateOrderDto);
   }
 
-  @Public()
+  @Roles(Role.Admin, Role.Agent, Role.Customer)
   @Get()
   @ApiOperation({ summary: 'Retrieve all orders' })
   @ApiResponse({ status: 200, description: 'Orders retrieved successfully' })
@@ -36,7 +36,7 @@ export class OrdersController {
     return this.ordersService.findAll();
   }
 
-  @Public()
+  @Roles(Role.Admin, Role.Agent, Role.Customer)
   @Get(':id')
   @ApiOperation({ summary: 'Retrieve an order by ID' })
   @ApiResponse({ status: 200, description: 'Order retrieved successfully' })

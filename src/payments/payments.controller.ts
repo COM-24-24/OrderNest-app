@@ -22,7 +22,7 @@ import { from } from 'rxjs';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @Public()
+  @Roles(Role.Customer, Role.Agent, Role.Admin)
   @Post()
   @ApiOperation({ summary: 'Create a new payment' })
   @ApiResponse({ status: 201, description: 'Payment created successfully' })
@@ -30,6 +30,7 @@ export class PaymentsController {
     return this.paymentsService.create(CreatePaymentDto);
   }
 
+  @Roles(Role.Admin)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a payment' })
   @ApiResponse({ status: 200, description: 'Payment updated successfully' })
@@ -42,10 +43,10 @@ export class PaymentsController {
     return this.paymentsService.update(id, dto);
   }
 
+  @Roles(Role.Admin, Role.Customer, Role.Agent)
   @Get()
   @ApiOperation({ summary: 'Retrieve all payments' })
   @ApiResponse({ status: 200, description: 'Payments retrieved successfully' })
-  @Roles(Role.Admin, Role.Customer, Role.Agent)
   findAll() {
     return this.paymentsService.findAll();
   }
@@ -54,7 +55,7 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Retrieve a payment by ID' })
   @ApiResponse({ status: 200, description: 'Payment retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Payment not found' })
-  @Roles(Role.Admin, Role.Customer, Role.Agent) // Only Admin can view individual payments
+  @Roles(Role.Admin, Role.Customer, Role.Agent)
   findOne(@Param('id') id: string): Promise<Payment | null> {
     return this.paymentsService.findOne(+id);
   }
